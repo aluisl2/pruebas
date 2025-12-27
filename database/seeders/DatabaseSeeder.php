@@ -18,8 +18,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
         ]);
-        $rolAdmin = Rol::where('nombre', 'Administrador')->first();
-        $rolProfesor = Rol::where('nombre', 'Profesor')->first();
+        $rolAdmin = Rol::where('nombre', 'ADMIN')->first();
+        $rolProfesor = Rol::where('nombre', 'PROFESOR')->first();
         User::query()->create([
             'rol_id' => $rolAdmin->id,
             'matricula' => '12345678',

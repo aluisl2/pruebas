@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Grupo;
+use App\Models\Inscripcion;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,9 +16,14 @@ class GrupoController extends Controller
         /** @var User $user */
         $user = Auth::user();
         // dependiendo el ROL
+        $grupos = Grupo::where('usuario_id', $user->id)
+            ->orderBy('created_at', 'desc') // Opcional: ordenar por fecha
+            ->get();
 
-
-        return Inertia::render('GruposDashboard');
+        // 2. Pasar la variable 'grupos' a la vista
+        return Inertia::render('GruposDashboard', [
+            'grupos' => $grupos
+        ]);
     }
 
     public function create()
@@ -78,7 +84,13 @@ class GrupoController extends Controller
     function show($id){
         // mostramos los datos
         $grupo = Grupo::query()->findOrFail($id);
-        return Inertia::render('GrupoManage', ['grupo' => $grupo]);
+        $grupos = Grupo::where('usuario_id', \Illuminate\Support\Facades\Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return Inertia::render('GrupoManage', [
+            'grupo' => $grupo,
+            'grupos' => $grupos
+        ]);
     }
 
     public function getMembers(Request $request, $id){
@@ -205,6 +217,21 @@ class GrupoController extends Controller
 
         return redirect()->route('dashboard');
     }
+    public function removeMember(Grupo $grupo, User $user)
+    {
+        // 1. Verificar seguridad: Solo el creador del grupo puede eliminar
+        if ($grupo->usuario_id !== Auth::id()) {
+            abort(403, 'No tienes permiso para eliminar alumnos de este grupo.');
+        }
 
+        // 2. Eliminar la inscripción
+        // Usamos el modelo Inscripcion directamente para borrar la relación
+        Inscripcion::where('grupo_id', $grupo->id)
+            ->where('usuario_id', $user->id)
+            ->delete();
+
+        // 3. Redirigir (Inertia recargará la página automáticamente)
+        return back();
+    }
 
 }

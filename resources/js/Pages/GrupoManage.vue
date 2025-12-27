@@ -17,7 +17,10 @@ interface Props {
     grupo: Grupo
 }
 
-const props = defineProps<Props>()
+const props = defineProps({
+    grupo: Object,
+    grupos: Array, // <--- 1. Agrega esta prop para recibir la lista
+});
 
 enum Tabs {
     Miembros,
@@ -79,7 +82,11 @@ const abrirReto = (r: any) => {
 </script>
 
 <template>
-    <SidebarOnlyLayout>
+    <SidebarOnlyLayout
+        :groups="grupos"
+        :activeGroupId="grupo.id"
+        hrefHome="/dashboard"
+    >
         <section class="mt-4">
             <div v-if="user.rol.clave === 'ALUMNO'" class="rounded-xl overflow-hidden flex flex-col sm:flex-row items-start sm:items-center sm:justify-between" :style="{ background: '#2B2E36'}">
                 <div class="pl-8 pr-2 py-5 w-full">
