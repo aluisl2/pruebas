@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+
+@theme {
+    --color-back: #e5edf9;
+    --color-primary: #e17101;
+}
+
+
+/* FAB más pequeño: 84x84 */
+.fabBtn{
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 64px;
+    height: 64px;
+    border-radius: 999px;
+    background: #3B3F48;
+    border: none;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index: 50;
+}
+
+@media (min-width: 768px) {
+    .fabBtn {
+        right: 70px;
+        bottom: 70px;
+        width: 84px;
+        height: 84px;
+    }
+}
+
+/* Cruz más pequeña */
+.plusV{
+    position:absolute;
+    width: 6px;
+    height: 32px;
+    background:#E17101;
+    border-radius: 10px;
+}
+.plusH{
+    position:absolute;
+    width: 32px;
+    height: 6px;
+    background:#E17101;
+    border-radius: 10px;
+}
+
+@media (min-width: 768px) {
+    .plusV {
+        width: 8px;
+        height: 44px;
+    }
+    .plusH {
+        width: 44px;
+        height: 8px;
+    }
+}
