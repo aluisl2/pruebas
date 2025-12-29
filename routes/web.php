@@ -31,6 +31,8 @@ Route::middleware([
                 ->name('grupo.show');
             Route::delete('/grupos/{grupo}/miembros/{user}', [GrupoController::class, 'removeMember'])
                 ->name('grupos.miembros.destroy');
+            Route::get('/retos/{id}/reporte', [RetoController::class, 'reporte'])->name('retos.reporte');
+            Route::get('/retos/{id}/reporte/pdf', [RetoController::class, 'descargarPdf'])->name('retos.reporte.pdf');
            // Route::post('profesor/{id}/alumnos',[GrupoManageController::class,'ge tMembers']);
         });
     Route::get('/grupos/crear', [GrupoController::class, 'create'])

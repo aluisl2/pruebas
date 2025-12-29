@@ -27,9 +27,9 @@ class RealizacionReto extends Model
         'es_mejor_intento' => 'boolean',
         'fecha_realizacion'=>'datetime',
     ];
-    public function usuario():BelongsTo
+    public function user():BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'usuario_id');
     }
     public function reto():BelongsTo
     {

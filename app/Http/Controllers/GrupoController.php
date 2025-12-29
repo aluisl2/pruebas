@@ -16,13 +16,18 @@ class GrupoController extends Controller
         /** @var User $user */
         $user = Auth::user();
         // dependiendo el ROL
-        $grupos = Grupo::where('usuario_id', $user->id)
-            ->orderBy('created_at', 'desc') // Opcional: ordenar por fecha
+        $gruposCreados = Grupo::where('usuario_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $gruposInscritos = $user->grupos()
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        // 2. Pasar la variable 'grupos' a la vista
+        // 3. Fusionamos ambas listas (por si un profesor también se inscribe a cursos de prueba)
+        $todosLosGrupos = $gruposCreados->merge($gruposInscritos)->unique('id');
+
         return Inertia::render('GruposDashboard', [
-            'grupos' => $grupos
+            'grupos' => $todosLosGrupos->values() // .values() reindexa el array para JS
         ]);
     }
 
@@ -40,6 +45,15 @@ class GrupoController extends Controller
             ->first();
         /** @var User $user */
         $user = Auth::user();
+        $inscrito = $user->grupos()
+            ->where('grupo_id', $grupo->id)
+            ->exists();
+        if($inscrito){
+            return response()->json([
+                'message' => 'Ya estas inscrito en este grupo',
+                'grupo' => $grupo
+            ], 422);
+        }
         $user->grupos()->attach($grupo);
         return response()->json($grupo);
     }
@@ -84,12 +98,22 @@ class GrupoController extends Controller
     function show($id){
         // mostramos los datos
         $grupo = Grupo::query()->findOrFail($id);
-        $grupos = Grupo::where('usuario_id', \Illuminate\Support\Facades\Auth::id())
+        /** @var User $user */
+        $user = Auth::user();
+        $gruposCreados = Grupo::where('usuario_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
+
+        $gruposInscritos = $user->grupos()
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $todosLosGrupos = $gruposCreados->merge($gruposInscritos)->unique('id')->values();
+
+        // 3. Renderizar
         return Inertia::render('GrupoManage', [
             'grupo' => $grupo,
-            'grupos' => $grupos
+            'grupos' => $todosLosGrupos
         ]);
     }
 
@@ -219,7 +243,6 @@ class GrupoController extends Controller
     }
     public function removeMember(Grupo $grupo, User $user)
     {
-        // 1. Verificar seguridad: Solo el creador del grupo puede eliminar
         if ($grupo->usuario_id !== Auth::id()) {
             abort(403, 'No tienes permiso para eliminar alumnos de este grupo.');
         }
@@ -231,7 +254,10 @@ class GrupoController extends Controller
             ->delete();
 
         // 3. Redirigir (Inertia recargará la página automáticamente)
-        return back();
+        return back()->with('flash', [
+            'banner' => 'Alumno eliminado del grupo correctamente.',
+            'bannerStyle' => 'success',
+        ]);
     }
 
 }
